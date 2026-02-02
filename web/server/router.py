@@ -38,6 +38,10 @@ def generate_plots():
         plot_jurisdiction_distribution(jurisdiction_dist, 'analytics/jurisdiction_distribution.png')
         plot_solution_distribution(solution_dist, 'analytics/solution_distribution.png')
         
+        # Generate decision type pie chart
+        decision_types_df = df['Type_Decision'].value_counts().to_pandas()
+        plot_decision_type_pie(decision_types_df, 'analytics/decision_type_pie.png')
+        
         print("✅ Plots generated successfully")
         
     except Exception as e:
