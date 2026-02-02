@@ -4,11 +4,40 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import polars as pl
 from analytics.metrics import compute_summary, compute_jurisdiction_distribution, compute_solution_distribution
+from analytics.plots import plot_jurisdiction_distribution, plot_solution_distribution
+import os
 
 # Setup templates
 templates = Jinja2Templates(directory="web/templates")
 
 router = APIRouter()
+
+def generate_plots():
+    """
+    Generate fresh plots when server starts or reloads
+    """
+    try:
+        print("📊 Generating fresh plots...")
+        
+        # Load data
+        df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=1000)
+        
+        # Compute distributions
+        jurisdiction_dist = compute_jurisdiction_distribution(df)
+        solution_dist = compute_solution_distribution(df)
+        
+        # Generate plots
+        plot_jurisdiction_distribution(jurisdiction_dist, 'analytics/jurisdiction_distribution.png')
+        plot_solution_distribution(solution_dist, 'analytics/solution_distribution.png')
+        
+        print("✅ Plots generated successfully")
+        
+    except Exception as e:
+        print(f"❌ Error generating plots: {e}")
+
+# Generate plots when module is loaded (on server start/reload)
+if not os.environ.get('TESTING'):
+    generate_plots()
 
 @router.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -17,7 +46,7 @@ async def read_root(request: Request):
     """
     try:
         # Load data
-        df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=1000)
+        df = pl.read_parquet('data/clean/court_decisions.parquet')
         
         # Compute statistics
         summary = compute_summary(df)
@@ -48,7 +77,7 @@ async def get_stats(request: Request):
     """
     try:
         # Load data
-        df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=1000)
+        df = pl.read_parquet('data/clean/court_decisions.parquet')
         
         # Compute statistics
         summary = compute_summary(df)
