@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="card">
+        <h2>📊 Dashboard Overview</h2>
+        <p>Summary statistics and visualizations of French administrative court decisions</p>
+    </div>
+    
+    <!-- Key Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Decisions</div>
+            <div class="stat-value">{{ summary.total_decisions }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Unique Jurisdictions</div>
+            <div class="stat-value">{{ summary.jurisdictions }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Date Range</div>
+            <div class="stat-value">{{ summary.date_range.min_date }} - {{ summary.date_range.max_date }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Decision Types</div>
+            <div class="stat-value">{{ summary.decision_types|length }}</div>
+        </div>
+    </div>
+    
+    <!-- Visualizations -->
+    <div class="plot-container">
+        <h3 class="plot-title">📍 Jurisdiction Distribution</h3>
+        <img src="{{ jurisdiction_plot }}" alt="Jurisdiction Distribution">
+    </div>
+    
+    <div class="plot-container">
+        <h3 class="plot-title">⚖️ Solution Distribution</h3>
+        <img src="{{ solution_plot }}" alt="Solution Distribution">
+    </div>
+    
+    <!-- Data Tables -->
+    <div class="card">
+        <h3>🏛️ Top Jurisdictions</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Jurisdiction</th>
+                    <th>Number of Decisions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in jurisdiction_dist %}
+                <tr>
+                    <td>{{ item.Nom_Juridiction }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="card">
+        <h3>⚖️ Top Solutions</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Solution Type</th>
+                    <th>Number of Decisions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in solution_dist %}
+                <tr>
+                    <td>{{ item.Solution }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

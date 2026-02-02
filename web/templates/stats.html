@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="card">
+        <h2>📈 Detailed Statistics</h2>
+        <p>Comprehensive statistical analysis of French administrative court decisions</p>
+    </div>
+    
+    <!-- Summary Statistics -->
+    <div class="card">
+        <h3>📊 Summary Statistics</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Decisions Analyzed</td>
+                    <td>{{ summary.total_decisions }}</td>
+                </tr>
+                <tr>
+                    <td>Unique Jurisdictions</td>
+                    <td>{{ summary.jurisdictions }}</td>
+                </tr>
+                <tr>
+                    <td>Earliest Decision Date</td>
+                    <td>{{ summary.date_range.min_date }}</td>
+                </tr>
+                <tr>
+                    <td>Latest Decision Date</td>
+                    <td>{{ summary.date_range.max_date }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Decision Types -->
+    <div class="card">
+        <h3>⚖️ Decision Types Distribution</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Decision Type</th>
+                    <th>Count</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for decision_type, count in summary.decision_types.items() %}
+                <tr>
+                    <td>{{ decision_type }}</td>
+                    <td>{{ count }}</td>
+                    <td>{{ "%.1f"|format((count / summary.total_decisions * 100)) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Solution Types -->
+    <div class="card">
+        <h3>🏆 Solution Types Distribution</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Solution Type</th>
+                    <th>Count</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for solution_type, count in summary.solution_types.items() %}
+                <tr>
+                    <td>{{ solution_type }}</td>
+                    <td>{{ count }}</td>
+                    <td>{{ "%.1f"|format((count / summary.total_decisions * 100)) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Publication Codes -->
+    <div class="card">
+        <h3>📰 Publication Codes Distribution</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Publication Code</th>
+                    <th>Count</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pub_code, count in summary.publication_codes.items() %}
+                <tr>
+                    <td>{{ pub_code }}</td>
+                    <td>{{ count }}</td>
+                    <td>{{ "%.1f"|format((count / summary.total_decisions * 100)) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
