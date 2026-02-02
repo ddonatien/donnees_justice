@@ -51,10 +51,10 @@
                 </tr>
             </thead>
             <tbody>
-                {% for jurisdiction, count in jurisdiction_dist.items() %}
+                {% for _, row in jurisdiction_dist.iterrows() %}
                 <tr>
-                    <td>{{ jurisdiction }}</td>
-                    <td>{{ count }}</td>
+                    <td>{{ row['Nom_Juridiction'] }}</td>
+                    <td>{{ row['count'] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -71,10 +71,10 @@
                 </tr>
             </thead>
             <tbody>
-                {% for solution, count in solution_dist.items() %}
+                {% for _, row in solution_dist.iterrows() %}
                 <tr>
-                    <td>{{ solution }}</td>
-                    <td>{{ count }}</td>
+                    <td>{{ row['Solution'] }}</td>
+                    <td>{{ row['count'] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

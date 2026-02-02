@@ -72,8 +72,8 @@ async def read_root(request: Request):
             "request": request,
             "title": "French Court Decisions Analytics",
             "summary": summary,
-            "jurisdiction_dist": jurisdiction_dist,
-            "solution_dist": solution_dist,
+            "jurisdiction_dist": jurisdiction_dist.head(10),
+            "solution_dist": solution_dist.head(10),
             "jurisdiction_plot": "/plots/jurisdiction_distribution.png",
             "solution_plot": "/plots/solution_distribution.png"
         }
