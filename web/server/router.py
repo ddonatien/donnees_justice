@@ -19,7 +19,7 @@ def generate_plots():
     try:
         print("📊 Generating fresh plots...")
         
-        # Load data
+        # Load data (use subset for faster processing)
         df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=1000)
         
         # Compute distributions
@@ -34,6 +34,7 @@ def generate_plots():
         
     except Exception as e:
         print(f"❌ Error generating plots: {e}")
+        print(traceback.format_exc())
 
 # Generate plots when module is loaded (on server start/reload)
 if not os.environ.get('TESTING'):
