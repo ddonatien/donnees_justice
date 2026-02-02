@@ -23,6 +23,11 @@ async def read_root(request: Request):
         jurisdiction_dist = compute_jurisdiction_distribution(df)
         solution_dist = compute_solution_distribution(df)
         
+        # Convert counts to integers for proper percentage calculation
+        summary['decision_types'] = {str(k): int(v) for k, v in summary['decision_types'].items()}
+        summary['solution_types'] = {str(k): int(v) for k, v in summary['solution_types'].items()}
+        summary['publication_codes'] = {str(k): int(v) for k, v in summary['publication_codes'].items()}
+        
         # Prepare data for template
         context = {
             "request": request,
