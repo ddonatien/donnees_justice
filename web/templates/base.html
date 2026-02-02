@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }} - French Court Analytics</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <style>
         * {
             margin: 0;
@@ -247,6 +248,38 @@
             <a href="/stats">📈 Statistics</a>
             <a href="/health">❤️ Health</a>
         </nav>
+        
+        <!-- Filter Form -->
+        <div class="filter-form">
+            <h3>🔍 Filter Data</h3>
+            <form id="filterForm" hx-post="/filter" hx-target="#filterResults" hx-swap="innerHTML">
+                <div class="filter-row" id="filter_row" hx-get="/filter-options" hx-trigger="load" hx-target="#filter_row" hx-swap="innerHTML">
+                    <div class="filter-group">
+                        <label for="decision_type">Decision Type:</label>
+                        <select id="decision_type" name="decision_type">
+                            <option value="all">All Types</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="solution">Solution:</label>
+                        <select id="solution" name="solution">
+                            <option value="all">All Solutions</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="jurisdiction">Jurisdiction:</label>
+                        <select id="jurisdiction" name="jurisdiction">
+                            <option value="all">All Jurisdictions</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="filter-button">Apply Filters</button>
+                <button type="button" class="filter-button reset-button" onclick="resetFilters()">Reset</button>
+            </form>
+        </div>
         
         {% block content %}{% endblock %}
     </div>

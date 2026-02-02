@@ -17,3 +17,9 @@ __pycache__/
 .vscode/
 # Ignore generated files
 *.log
+analytics/decision_type_pie.png
+analytics/filtered_decision_type_pie.png
+analytics/filtered_jurisdiction_distribution.png
+analytics/filtered_solution_distribution.png
+analytics/jurisdiction_distribution.png
+analytics/solution_distribution.png

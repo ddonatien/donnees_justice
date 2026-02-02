@@ -1,0 +1,26 @@
+<div class="filter-group">
+    <label for="decision_type">Decision Type:</label>
+    <select id="decision_type" name="decision_type">
+        {% for v in values['decision_types'] %}
+            <option value="{{ v }}">{{ v }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="filter-group">
+    <label for="solution">Solution:</label>
+    <select id="solution" name="solution">
+        {% for v in values['solutions'] %}
+            <option value="{{ v }}">{{ v }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="filter-group">
+    <label for="jurisdiction">Jurisdiction:</label>
+    <select id="jurisdiction" name="jurisdiction">
+        {% for v in values['jurisdictions'] %}
+            <option value="{{ v }}">{{ v }}</option>
+        {% endfor %}
+    </select>
+</div>

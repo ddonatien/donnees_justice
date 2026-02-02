@@ -13,35 +13,36 @@ templates = Jinja2Templates(directory="web/templates")
 
 router = APIRouter()
 
-def generate_plots():
+def generate_plots(df: pl.DataFrame = None, prefix: str = ""):
     """
     Generate fresh plots when server starts or reloads
     """
     try:
         print("📊 Generating fresh plots...")
         
-        # Load data with configurable sample size
-        # DATA_SAMPLE_SIZE=0 uses all data, any positive number uses that many rows
-        sample_size = os.environ.get('DATA_SAMPLE_SIZE')
-        
-        if sample_size and int(sample_size) > 0:
-            df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=int(sample_size))
-            print(f"📊 Using sample of {sample_size} rows")
-        else:
-            df = pl.read_parquet('data/clean/court_decisions.parquet')
-            print(f"📊 Using full dataset")
+        if df is None:
+            # Load data with configurable sample size
+            # DATA_SAMPLE_SIZE=0 uses all data, any positive number uses that many rows
+            sample_size = os.environ.get('DATA_SAMPLE_SIZE')
+            
+            if sample_size and int(sample_size) > 0:
+                df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=int(sample_size))
+                print(f"📊 Using sample of {sample_size} rows")
+            else:
+                df = pl.read_parquet('data/clean/court_decisions.parquet')
+                print(f"📊 Using full dataset")
         
         # Compute distributions
         jurisdiction_dist = compute_jurisdiction_distribution(df)
         solution_dist = compute_solution_distribution(df)
         
         # Generate plots
-        plot_jurisdiction_distribution(jurisdiction_dist, 'analytics/jurisdiction_distribution.png')
-        plot_solution_distribution(solution_dist, 'analytics/solution_distribution.png')
+        plot_jurisdiction_distribution(jurisdiction_dist, f'analytics/{prefix}jurisdiction_distribution.png')
+        plot_solution_distribution(solution_dist, f'analytics/{prefix}solution_distribution.png')
         
         # Generate decision type pie chart
         decision_types_df = df['Type_Decision'].value_counts().to_pandas()
-        plot_decision_type_pie(decision_types_df, 'analytics/decision_type_pie.png')
+        plot_decision_type_pie(decision_types_df, f'analytics/{prefix}decision_type_pie.png')
         
         print("✅ Plots generated successfully")
         
@@ -107,9 +108,9 @@ async def read_root(request: Request):
             "jurisdiction_dist": jurisdiction_dist.head(10),
             "solution_dist": solution_dist.head(10),
             "jurisdiction_plot": "/plots/jurisdiction_distribution.png",
-            "solution_plot": "/plots/solution_distribution.png"
+            "solution_plot": "/plots/solution_distribution.png",
+            "type_pie": "/plots/decision_type_pie.png"
         }
-
         
         return templates.TemplateResponse("dashboard.html", context)
         
@@ -144,8 +145,8 @@ async def get_stats(request: Request):
     except Exception as e:
         return HTMLResponse(content=f"<h1>Error</h1><p>{str(e)}</p>", status_code=500)
 
-@router.get("/filter-options")
-async def get_filter_options_endpoint():
+@router.get("/filter-options", response_class=HTMLResponse)
+async def get_filter_options_endpoint(request: Request):
     """
     Get available filter options
     """
@@ -161,17 +162,23 @@ async def get_filter_options_endpoint():
         # Get filter options
         options = get_filter_options(df)
         
-        return JSONResponse(content=options)
+        # return JSONResponse(content=options)
+        return templates.TemplateResponse(
+            "options.html",
+            {"request": request, "values": options},
+        )
         
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 @router.post("/filter")
 async def apply_filters_endpoint(
-    decision_type: str = Form("all"),
-    solution: str = Form("all"),
-    jurisdiction: str = Form("all")
+    request: Request,
 ):
+    form_data = await request.form()
+    decision_type = form_data.get("decision_type", "all")
+    solution = form_data.get("solution", "all")
+    jurisdiction = form_data.get("jurisdiction", "all")
     """
     Apply filters and return filtered data
     """
@@ -186,22 +193,27 @@ async def apply_filters_endpoint(
         
         # Apply filters
         filtered_df = apply_filters(df, decision_type, solution, jurisdiction)
+
+        generate_plots(filtered_df, prefix="filtered_")
         
         # Compute statistics
         summary = compute_summary(filtered_df)
         jurisdiction_dist = compute_jurisdiction_distribution(filtered_df)
         solution_dist = compute_solution_distribution(filtered_df)
         
-        # Prepare response
-        response = {
+        # Prepare data for template
+        context = {
+            "request": request,
+            "title": "French Court Decisions Analytics",
             "summary": summary,
-            "jurisdiction_dist": jurisdiction_dist.head(10).to_dicts(),
-            "solution_dist": solution_dist.head(10).to_dicts(),
-            "filtered_count": len(filtered_df),
-            "total_count": len(df)
+            "jurisdiction_dist": jurisdiction_dist.head(10),
+            "solution_dist": solution_dist.head(10),
+            "jurisdiction_plot": f"/plots/filtered_jurisdiction_distribution.png",
+            "solution_plot": f"/plots/filtered_solution_distribution.png",
+            "type_pie": f"/plots/filtered_decision_type_pie.png"
         }
         
-        return JSONResponse(content=response)
+        return templates.TemplateResponse("dashboard_content.html", context)
         
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)

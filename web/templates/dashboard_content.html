@@ -1,0 +1,78 @@
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Decisions</div>
+        <div class="stat-value">{{ summary.total_decisions }}</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-label">Unique Jurisdictions</div>
+        <div class="stat-value">{{ summary.jurisdictions }}</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-label">Date Range</div>
+        <div class="stat-value">{{ summary.date_range.min_date }} - {{ summary.date_range.max_date }}</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-label">Decision Types</div>
+        <div class="stat-value">{{ summary.decision_types|length }}</div>
+    </div>
+</div>
+
+<!-- Visualizations -->
+<div class="plot-container">
+    <h3 class="plot-title">📍 Jurisdiction Distribution</h3>
+    <img src="{{ jurisdiction_plot }}" alt="Jurisdiction Distribution">
+</div>
+
+<div class="plot-container">
+    <h3 class="plot-title">⚖️ Solution Distribution</h3>
+    <img src="{{ solution_plot }}" alt="Solution Distribution">
+</div>
+
+<div class="plot-container">
+    <h3 class="plot-title">📊 Decision Type Distribution</h3>
+    <img src="{{ type_pie }}" alt="Decision Type Pie Chart">
+</div>
+
+<!-- Data Tables -->
+<div class="card">
+    <h3>🏛️ Top Jurisdictions</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Jurisdiction</th>
+                <th>Number of Decisions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for _, row in jurisdiction_dist.iterrows() %}
+            <tr>
+                <td>{{ row['Nom_Juridiction'] }}</td>
+                <td>{{ row['count'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h3>⚖️ Top Solutions</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Solution Type</th>
+                <th>Number of Decisions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for _, row in solution_dist.iterrows() %}
+            <tr>
+                <td>{{ row['Solution'] }}</td>
+                <td>{{ row['count'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -24,7 +24,7 @@ def plot_jurisdiction_distribution(distribution_df: pd.DataFrame,
     top_jurisdictions = distribution_df.head(top_n)
     
     # Create bar plot
-    ax = sns.barplot(data=top_jurisdictions, x='count', y='Nom_Juridiction', palette='viridis')
+    ax = sns.barplot(data=top_jurisdictions, x='count', y='Nom_Juridiction', palette='viridis', hue='Nom_Juridiction', legend=False)
     
     # Customize plot
     plt.title(f'Top {top_n} Jurisdictions by Number of Decisions', fontsize=16)
@@ -44,21 +44,24 @@ def plot_jurisdiction_distribution(distribution_df: pd.DataFrame,
     return plt.gcf()
 
 def plot_solution_distribution(distribution_df: pd.DataFrame, 
-                              output_path: Optional[str] = None) -> plt.Figure:
+                              output_path: Optional[str] = None,
+                              top_n: int = 20) -> plt.Figure:
     """
     Create a bar plot of decision distribution by solution type.
     
     Args:
         distribution_df: DataFrame with solution distribution
         output_path: Optional path to save the plot
-        
+        top_n: Number of top solution types to show
     Returns:
         Matplotlib Figure object
     """
     plt.figure(figsize=(12, 6))
+
+    top_distribution = distribution_df.head(top_n)
     
     # Create horizontal bar plot
-    ax = sns.barplot(data=distribution_df, x='count', y='Solution', palette='coolwarm')
+    ax = sns.barplot(data=top_distribution, x='count', y='Solution', palette='coolwarm', hue='Solution', legend=False)
     
     # Customize plot
     plt.title('Decision Distribution by Solution Type', fontsize=16)
@@ -67,7 +70,7 @@ def plot_solution_distribution(distribution_df: pd.DataFrame,
     plt.tight_layout()
     
     # Add value labels
-    for i, v in enumerate(distribution_df['count']):
+    for i, v in enumerate(top_distribution['count']):
         ax.text(v + 5, i, str(v), color='black', fontsize=10)
     
     # Save if output path provided
@@ -91,8 +94,6 @@ def plot_decision_type_pie(df: pd.DataFrame, output_path: Optional[str] = None) 
     plt.figure(figsize=(10, 8))
     
     # Create pie chart
-    print("Creating pie chart for decision types...")
-    print(df['Type_Decision'])
     plt.pie(df['count'], labels=df['Type_Decision'], autopct='%1.1f%%', 
             startangle=90, colors=sns.color_palette('pastel'))
     
