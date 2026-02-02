@@ -19,8 +19,16 @@ def generate_plots():
     try:
         print("📊 Generating fresh plots...")
         
-        # Load data (use subset for faster processing)
-        df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=1000)
+        # Load data with configurable sample size
+        # DATA_SAMPLE_SIZE=0 uses all data, any positive number uses that many rows
+        sample_size = os.environ.get('DATA_SAMPLE_SIZE')
+        
+        if sample_size and int(sample_size) > 0:
+            df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=int(sample_size))
+            print(f"📊 Using sample of {sample_size} rows")
+        else:
+            df = pl.read_parquet('data/clean/court_decisions.parquet')
+            print(f"📊 Using full dataset")
         
         # Compute distributions
         jurisdiction_dist = compute_jurisdiction_distribution(df)
