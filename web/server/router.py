@@ -1,11 +1,12 @@
 import traceback
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Request, Form
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import polars as pl
 from analytics.metrics import compute_summary, compute_jurisdiction_distribution, compute_solution_distribution
-from analytics.plots import plot_jurisdiction_distribution, plot_solution_distribution
+from analytics.plots import plot_jurisdiction_distribution, plot_solution_distribution, plot_decision_type_pie
 import os
+import json
 
 # Setup templates
 templates = Jinja2Templates(directory="web/templates")
@@ -47,6 +48,33 @@ def generate_plots():
     except Exception as e:
         print(f"❌ Error generating plots: {e}")
         print(traceback.format_exc())
+
+def apply_filters(df: pl.DataFrame, decision_type: str = None, solution: str = None, jurisdiction: str = None) -> pl.DataFrame:
+    """
+    Apply filters to the dataframe based on selected criteria
+    """
+    filtered_df = df
+    
+    if decision_type and decision_type != "all":
+        filtered_df = filtered_df.filter(pl.col('Type_Decision') == decision_type)
+    
+    if solution and solution != "all":
+        filtered_df = filtered_df.filter(pl.col('Solution') == solution)
+    
+    if jurisdiction and jurisdiction != "all":
+        filtered_df = filtered_df.filter(pl.col('Nom_Juridiction') == jurisdiction)
+    
+    return filtered_df
+
+def get_filter_options(df: pl.DataFrame) -> dict:
+    """
+    Get available options for all filters
+    """
+    return {
+        'decision_types': ['all'] + df['Type_Decision'].unique().to_list(),
+        'solutions': ['all'] + df['Solution'].unique().to_list(),
+        'jurisdictions': ['all'] + df['Nom_Juridiction'].unique().to_list()
+    }
 
 # Generate plots when module is loaded (on server start/reload)
 if not os.environ.get('TESTING'):
@@ -115,6 +143,68 @@ async def get_stats(request: Request):
         
     except Exception as e:
         return HTMLResponse(content=f"<h1>Error</h1><p>{str(e)}</p>", status_code=500)
+
+@router.get("/filter-options")
+async def get_filter_options_endpoint():
+    """
+    Get available filter options
+    """
+    try:
+        # Load data
+        sample_size = os.environ.get('DATA_SAMPLE_SIZE')
+        
+        if sample_size and int(sample_size) > 0:
+            df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=int(sample_size))
+        else:
+            df = pl.read_parquet('data/clean/court_decisions.parquet')
+        
+        # Get filter options
+        options = get_filter_options(df)
+        
+        return JSONResponse(content=options)
+        
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+@router.post("/filter")
+async def apply_filters_endpoint(
+    decision_type: str = Form("all"),
+    solution: str = Form("all"),
+    jurisdiction: str = Form("all")
+):
+    """
+    Apply filters and return filtered data
+    """
+    try:
+        # Load data
+        sample_size = os.environ.get('DATA_SAMPLE_SIZE')
+        
+        if sample_size and int(sample_size) > 0:
+            df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=int(sample_size))
+        else:
+            df = pl.read_parquet('data/clean/court_decisions.parquet')
+        
+        # Apply filters
+        filtered_df = apply_filters(df, decision_type, solution, jurisdiction)
+        
+        # Compute statistics
+        summary = compute_summary(filtered_df)
+        jurisdiction_dist = compute_jurisdiction_distribution(filtered_df)
+        solution_dist = compute_solution_distribution(filtered_df)
+        
+        # Prepare response
+        response = {
+            "summary": summary,
+            "jurisdiction_dist": jurisdiction_dist.head(10).to_dicts(),
+            "solution_dist": solution_dist.head(10).to_dicts(),
+            "filtered_count": len(filtered_df),
+            "total_count": len(df)
+        }
+        
+        return JSONResponse(content=response)
+        
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 @router.get("/health")
 async def health_check():

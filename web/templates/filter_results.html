@@ -1,0 +1,126 @@
+{% if 'error' in result %}
+<div class="error">
+    Error: {{ result.error }}
+</div>
+{% else %}
+<div class="filter-results">
+    <div class="filter-info">
+        <strong>📊 Filter Results:</strong> 
+        Showing {{ result.filtered_count }} of {{ result.total_count }} decisions
+        {% if result.filtered_count < result.total_count %}
+        ({{ "%.1f"|format((result.filtered_count / result.total_count * 100)) }}% of total)
+        {% endif %}
+    </div>
+    
+    <!-- Filtered Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Filtered Decisions</div>
+            <div class="stat-value">{{ result.summary.total_decisions }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Unique Jurisdictions</div>
+            <div class="stat-value">{{ result.summary.jurisdictions }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Date Range</div>
+            <div class="stat-value">{{ result.summary.date_range.min_date }} - {{ result.summary.date_range.max_date }}</div>
+        </div>
+    </div>
+    
+    <!-- Filtered Data Tables -->
+    <div class="card">
+        <h3>🏛️ Top Jurisdictions (Filtered)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Jurisdiction</th>
+                    <th>Number of Decisions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in result.jurisdiction_dist %}
+                <tr>
+                    <td>{{ item.Nom_Juridiction }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="card">
+        <h3>⚖️ Top Solutions (Filtered)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Solution Type</th>
+                    <th>Number of Decisions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in result.solution_dist %}
+                <tr>
+                    <td>{{ item.Solution }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScript for loading filter options -->
+<script>
+// Load filter options when page loads
+async function loadFilterOptions() {
+    try {
+        const response = await fetch('/filter-options');
+        const options = await response.json();
+        
+        // Populate decision type dropdown
+        const decisionTypeSelect = document.getElementById('decision_type');
+        options.decision_types.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            decisionTypeSelect.appendChild(option);
+        });
+        
+        // Populate solution dropdown
+        const solutionSelect = document.getElementById('solution');
+        options.solutions.forEach(solution => {
+            const option = document.createElement('option');
+            option.value = solution;
+            option.textContent = solution;
+            solutionSelect.appendChild(option);
+        });
+        
+        // Populate jurisdiction dropdown
+        const jurisdictionSelect = document.getElementById('jurisdiction');
+        options.jurisdictions.forEach(jurisdiction => {
+            const option = document.createElement('option');
+            option.value = jurisdiction;
+            option.textContent = jurisdiction;
+            jurisdictionSelect.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Error loading filter options:', error);
+    }
+}
+
+// Reset filters function
+function resetFilters() {
+    document.getElementById('decision_type').value = 'all';
+    document.getElementById('solution').value = 'all';
+    document.getElementById('jurisdiction').value = 'all';
+    document.getElementById('filterResults').innerHTML = '';
+}
+
+// Load filter options when page loads
+document.addEventListener('DOMContentLoaded', loadFilterOptions);
+</script>
+{% endif %}

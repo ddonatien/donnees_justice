@@ -4,7 +4,43 @@
     <div class="card">
         <h2>📊 Dashboard Overview</h2>
         <p>Summary statistics and visualizations of French administrative court decisions</p>
+        
+        <!-- Filter Form -->
+        <div class="filter-form">
+            <h3>🔍 Filter Data</h3>
+            <form id="filterForm" hx-post="/filter" hx-target="#filterResults" hx-swap="innerHTML">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="decision_type">Decision Type:</label>
+                        <select id="decision_type" name="decision_type">
+                            <option value="all">All Types</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="solution">Solution:</label>
+                        <select id="solution" name="solution">
+                            <option value="all">All Solutions</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="jurisdiction">Jurisdiction:</label>
+                        <select id="jurisdiction" name="jurisdiction">
+                            <option value="all">All Jurisdictions</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="filter-button">Apply Filters</button>
+                <button type="button" class="filter-button reset-button" onclick="resetFilters()">Reset</button>
+            </form>
+        </div>
     </div>
+    
+    <!-- Filter Results -->
+    <div id="filterResults"></div>
+=======
     
     <!-- Key Statistics -->
     <div class="stats-grid">
