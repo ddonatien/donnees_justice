@@ -91,6 +91,8 @@ def plot_decision_type_pie(df: pd.DataFrame, output_path: Optional[str] = None) 
     plt.figure(figsize=(10, 8))
     
     # Create pie chart
+    print("Creating pie chart for decision types...")
+    print(df['Type_Decision'])
     plt.pie(df['count'], labels=df['Type_Decision'], autopct='%1.1f%%', 
             startangle=90, colors=sns.color_palette('pastel'))
     

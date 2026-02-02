@@ -1,3 +1,4 @@
+import traceback
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -23,21 +24,17 @@ async def read_root(request: Request):
         jurisdiction_dist = compute_jurisdiction_distribution(df)
         solution_dist = compute_solution_distribution(df)
         
-        # Convert counts to integers for proper percentage calculation
-        summary['decision_types'] = {str(k): int(v) for k, v in summary['decision_types'].items()}
-        summary['solution_types'] = {str(k): int(v) for k, v in summary['solution_types'].items()}
-        summary['publication_codes'] = {str(k): int(v) for k, v in summary['publication_codes'].items()}
-        
         # Prepare data for template
         context = {
             "request": request,
             "title": "French Court Decisions Analytics",
             "summary": summary,
-            "jurisdiction_dist": jurisdiction_dist.head(10).to_dicts(),
-            "solution_dist": solution_dist.head(10).to_dicts(),
+            "jurisdiction_dist": jurisdiction_dist,
+            "solution_dist": solution_dist,
             "jurisdiction_plot": "/plots/jurisdiction_distribution.png",
             "solution_plot": "/plots/solution_distribution.png"
         }
+
         
         return templates.TemplateResponse("dashboard.html", context)
         

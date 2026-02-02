@@ -12,30 +12,10 @@ def collate_counts(series: pl.Series) -> Dict[str, int]:
 
     Returns:
         Dictionary mapping values to their counts
-        
-    Raises:
-        ValueError: If the series doesn't have exactly 2 columns
     """
     _cols = series.columns
-    
-    # Validate column count with descriptive error
-    if len(_cols) != 2:
-        raise ValueError(f"Expected 2 columns in value_counts result, got {len(_cols)}: {_cols}")
-    
-    # Convert to lists and ensure proper types
-    keys = series[_cols[0]].to_list()
-    values = series[_cols[1]].to_list()
-    
-    # Convert values to integers and validate
-    try:
-        int_values = [int(v) for v in values]
-    except (ValueError, TypeError) as e:
-        raise ValueError(f"Count values must be integers, got: {values}") from e
-    
-    # Convert keys to strings for consistency
-    str_keys = [str(k) for k in keys]
-    
-    return dict(zip(str_keys, int_values))
+    assert len(_cols) == 2
+    return dict(zip(*[series[c].to_list() for c in _cols]))
 
 def compute_summary(df: pl.DataFrame) -> Dict[str, Any]:
     """
@@ -61,7 +41,7 @@ def compute_summary(df: pl.DataFrame) -> Dict[str, Any]:
     
     return summary
 
-def compute_jurisdiction_distribution(df: pl.DataFrame) -> pd.DataFrame:
+def compute_jurisdiction_distribution(df: pl.DataFrame) -> Dict[str, int]:
     """
     Compute distribution of decisions by jurisdiction.
     
@@ -71,9 +51,9 @@ def compute_jurisdiction_distribution(df: pl.DataFrame) -> pd.DataFrame:
     Returns:
         Pandas DataFrame with jurisdiction distribution
     """
-    return df.group_by('Nom_Juridiction').count().sort('count', descending=True).to_pandas()
+    return collate_counts(df.group_by('Nom_Juridiction').count().sort('count', descending=True))
 
-def compute_solution_distribution(df: pl.DataFrame) -> pd.DataFrame:
+def compute_solution_distribution(df: pl.DataFrame) -> Dict[str, int]:
     """
     Compute distribution of decisions by solution type.
     
@@ -83,4 +63,4 @@ def compute_solution_distribution(df: pl.DataFrame) -> pd.DataFrame:
     Returns:
         Pandas DataFrame with solution distribution
     """
-    return df.group_by('Solution').count().sort('count', descending=True).to_pandas()
+    return collate_counts(df.group_by('Solution').count().sort('count', descending=True))
