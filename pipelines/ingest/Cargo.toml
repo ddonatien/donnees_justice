@@ -1,0 +1,8 @@
+[package]
+name = "ingest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+polars = "0.19"
+arrow-io = { version = "0.3", features = ["parquet"] }

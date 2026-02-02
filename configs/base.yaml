@@ -1,0 +1,10 @@
+# Base configuration
+# This file is merged with environment-specific configs
+schema:
+  type: object
+  properties:
+    data_dir:
+      type: string
+      description: Path to data directories
+  required:
+    - data_dir

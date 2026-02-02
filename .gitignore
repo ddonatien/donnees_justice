@@ -1,0 +1,19 @@
+# .gitignore
+CLAUDE.md
+.DS_Store
+# Sample data files
+PROJECT_SPEC.txt
+# Data output directories
+/data/**/clean/**
+/data/**/intermediate/**
+# Build artifacts
+/target/
+*.o
+*.out
+*.pyc
+__pycache__/
+# Python virtual envs
+.env
+.vscode/
+# Ignore generated files
+*.log
