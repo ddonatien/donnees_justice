@@ -41,7 +41,7 @@ def compute_summary(df: pl.DataFrame) -> Dict[str, Any]:
     
     return summary
 
-def compute_jurisdiction_distribution(df: pl.DataFrame) -> Dict[str, int]:
+def compute_jurisdiction_distribution(df: pl.DataFrame) -> pd.DataFrame:
     """
     Compute distribution of decisions by jurisdiction.
     
@@ -51,9 +51,9 @@ def compute_jurisdiction_distribution(df: pl.DataFrame) -> Dict[str, int]:
     Returns:
         Pandas DataFrame with jurisdiction distribution
     """
-    return collate_counts(df.group_by('Nom_Juridiction').count().sort('count', descending=True))
+    return df.group_by('Nom_Juridiction').count().sort('count', descending=True).to_pandas()
 
-def compute_solution_distribution(df: pl.DataFrame) -> Dict[str, int]:
+def compute_solution_distribution(df: pl.DataFrame) -> pd.DataFrame:
     """
     Compute distribution of decisions by solution type.
     
@@ -63,4 +63,4 @@ def compute_solution_distribution(df: pl.DataFrame) -> Dict[str, int]:
     Returns:
         Pandas DataFrame with solution distribution
     """
-    return collate_counts(df.group_by('Solution').count().sort('count', descending=True))
+    return df.group_by('Solution').count().sort('count', descending=True).to_pandas()

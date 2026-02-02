@@ -54,8 +54,13 @@ async def read_root(request: Request):
     Main dashboard showing court decisions analytics
     """
     try:
-        # Load data
-        df = pl.read_parquet('data/clean/court_decisions.parquet')
+        # Load data with configurable sample size
+        sample_size = os.environ.get('DATA_SAMPLE_SIZE')
+        
+        if sample_size and int(sample_size) > 0:
+            df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=int(sample_size))
+        else:
+            df = pl.read_parquet('data/clean/court_decisions.parquet')
         
         # Compute statistics
         summary = compute_summary(df)
@@ -85,8 +90,13 @@ async def get_stats(request: Request):
     Detailed statistics page
     """
     try:
-        # Load data
-        df = pl.read_parquet('data/clean/court_decisions.parquet')
+        # Load data with configurable sample size
+        sample_size = os.environ.get('DATA_SAMPLE_SIZE')
+        
+        if sample_size and int(sample_size) > 0:
+            df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=int(sample_size))
+        else:
+            df = pl.read_parquet('data/clean/court_decisions.parquet')
         
         # Compute statistics
         summary = compute_summary(df)
