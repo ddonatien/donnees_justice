@@ -177,7 +177,6 @@ async def apply_filters_endpoint(
     request: Request,
 ):
     url_path = urlparse(request.headers['hx-current-url']).path
-    print(f"Filtering request from {url_path}")
     form_data = await request.form()
     decision_type = form_data.get("decision_type", "all")
     solution = form_data.get("solution", "all")
