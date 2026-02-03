@@ -1,4 +1,5 @@
 import traceback
+from urllib.parse import urlparse
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -175,6 +176,8 @@ async def get_filter_options_endpoint(request: Request):
 async def apply_filters_endpoint(
     request: Request,
 ):
+    url_path = urlparse(request.headers['hx-current-url']).path
+    print(f"Filtering request from {url_path}")
     form_data = await request.form()
     decision_type = form_data.get("decision_type", "all")
     solution = form_data.get("solution", "all")
@@ -198,22 +201,33 @@ async def apply_filters_endpoint(
         
         # Compute statistics
         summary = compute_summary(filtered_df)
-        jurisdiction_dist = compute_jurisdiction_distribution(filtered_df)
-        solution_dist = compute_solution_distribution(filtered_df)
-        
-        # Prepare data for template
-        context = {
-            "request": request,
-            "title": "French Court Decisions Analytics",
-            "summary": summary,
-            "jurisdiction_dist": jurisdiction_dist.head(10),
-            "solution_dist": solution_dist.head(10),
-            "jurisdiction_plot": f"/plots/filtered_jurisdiction_distribution.png",
-            "solution_plot": f"/plots/filtered_solution_distribution.png",
-            "type_pie": f"/plots/filtered_decision_type_pie.png"
-        }
-        
-        return templates.TemplateResponse("dashboard_content.html", context)
+        if url_path == "/stats":
+            context = {
+                "request": request,
+                "title": "Detailed Statistics",
+                "summary": summary
+            }
+            
+            return templates.TemplateResponse("stats_content.html", context)
+        elif url_path == "/":
+            jurisdiction_dist = compute_jurisdiction_distribution(filtered_df)
+            solution_dist = compute_solution_distribution(filtered_df)
+            
+            # Prepare data for template
+            context = {
+                "request": request,
+                "title": "French Court Decisions Analytics",
+                "summary": summary,
+                "jurisdiction_dist": jurisdiction_dist.head(10),
+                "solution_dist": solution_dist.head(10),
+                "jurisdiction_plot": f"/plots/filtered_jurisdiction_distribution.png",
+                "solution_plot": f"/plots/filtered_solution_distribution.png",
+                "type_pie": f"/plots/filtered_decision_type_pie.png"
+            }
+            
+            return templates.TemplateResponse("dashboard_content.html", context)
+        else:
+            return JSONResponse(content={"error": "Unknown URL path"}, status_code=400)
         
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)

@@ -69,8 +69,12 @@ fn process_xml_files(xml_files: Vec<String>) -> Result<Vec<Document>> {
     
     for file_path in xml_files {
         let path = Path::new(&file_path);
-        let xml_content = read_xml_file(path)?;
-        let document = parse_xml_file(&xml_content)?;
+        // Print file path if read_xml_file fails
+        let xml_content = read_xml_file(path)
+            .context(format!("Error reading XML file: {}", file_path))?;
+        // Print file path if parse_xml_file fails
+        let document = parse_xml_file(&xml_content)
+            .context(format!("Error parsing XML file: {}", file_path))?;
         documents.push(document);
     }
     
@@ -148,6 +152,7 @@ fn main() -> Result<()> {
     let data_dir = "data/raw";
     let output_file = "data/clean/court_decisions.parquet";
     
+    println!("Ingesting files. This may take a while... ⏳ (5mins)");
     println!("🔍 Finding XML files in: {}", data_dir);
     let xml_files = find_xml_files(data_dir)?;
     println!("📁 Found {} XML files", xml_files.len());
