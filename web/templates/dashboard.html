@@ -31,19 +31,21 @@
         </div>
         
         <!-- Visualizations -->
-        <div class="plot-container">
-            <h3 class="plot-title">📍 Jurisdiction Distribution</h3>
-            <img src="{{ jurisdiction_plot }}" alt="Jurisdiction Distribution">
-        </div>
-        
-        <div class="plot-container">
-            <h3 class="plot-title">⚖️ Solution Distribution</h3>
-            <img src="{{ solution_plot }}" alt="Solution Distribution">
-        </div>
-        
-        <div class="plot-container">
-            <h3 class="plot-title">📊 Decision Type Distribution</h3>
-            <img src="/plots/decision_type_pie.png" alt="Decision Type Pie Chart">
+        <div class="plot-grid">
+            <div class="plot-container">
+                <h3 class="plot-title">📍 Jurisdiction Distribution</h3>
+                <img src="{{ jurisdiction_plot }}" alt="Jurisdiction Distribution">
+            </div>
+            
+            <div class="plot-container">
+                <h3 class="plot-title">⚖️ Solution Distribution</h3>
+                <img src="{{ solution_plot }}" alt="Solution Distribution">
+            </div>
+            
+            <div class="plot-container">
+                <h3 class="plot-title">📊 Decision Type Distribution</h3>
+                <img src="/plots/decision_type_pie.png" alt="Decision Type Pie Chart">
+            </div>
         </div>
         
         <!-- Data Tables -->
