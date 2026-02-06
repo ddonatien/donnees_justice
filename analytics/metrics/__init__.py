@@ -64,3 +64,15 @@ def compute_solution_distribution(df: pl.DataFrame) -> pd.DataFrame:
         Pandas DataFrame with solution distribution
     """
     return df.group_by('Solution').count().sort('count', descending=True).to_pandas()
+
+def compute_recours_type_distribution(df: pl.DataFrame) -> pd.DataFrame:
+    """
+    Compute distribution of decisions by recours type.
+    
+    Args:
+        df: Polars DataFrame containing court decisions
+        
+    Returns:
+        Pandas DataFrame with recours type distribution
+    """
+    return df.group_by('Type_Recours').count().sort('count', descending=True).to_pandas()   

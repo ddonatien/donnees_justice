@@ -38,6 +38,7 @@ def plot_jurisdiction_distribution(distribution_df: pd.DataFrame,
     
     # Create bar plot
     ax = sns.barplot(data=_top_jurisdictions_processed, x='count', y='Nom_Juridiction', palette='viridis', hue='Nom_Juridiction', legend=False)
+    sns.despine(left=True, bottom=True)
     
     # Customize plot
     plt.title(f'Top {top_n} Jurisdictions by Number of Decisions', fontsize=16)
@@ -51,7 +52,7 @@ def plot_jurisdiction_distribution(distribution_df: pd.DataFrame,
     
     # Save if output path provided
     if output_path:
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=300, bbox_inches='tight', transparent=True)
         plt.close()
     
     return plt.gcf()
@@ -77,6 +78,7 @@ def plot_solution_distribution(distribution_df: pd.DataFrame,
     
     # Create horizontal bar plot
     ax = sns.barplot(data=_top_distribution_processed, x='count', y='Solution', palette='coolwarm', hue='Solution', legend=False)
+    sns.despine(left=True, bottom=True)
     
     # Customize plot
     plt.title('Decision Distribution by Solution Type', fontsize=16)
@@ -90,34 +92,42 @@ def plot_solution_distribution(distribution_df: pd.DataFrame,
     
     # Save if output path provided
     if output_path:
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=300, bbox_inches='tight', transparent=True)
         plt.close()
     
     return plt.gcf()
 
-def plot_decision_type_pie(df: pd.DataFrame, output_path: Optional[str] = None) -> plt.Figure:
+def plot_recours_type_distribution(distribution_df: pd.DataFrame, output_path: Optional[str] = None) -> plt.Figure:
     """
-    Create a pie chart of decision types.
+    Create a bar plot chart of recours types.
     
     Args:
-        df: DataFrame with decision type distribution
+        df: DataFrame with recours type distribution
         output_path: Optional path to save the plot
         
     Returns:
         Matplotlib Figure object
     """
     plt.figure(figsize=(12, 8))
+
+    top_distribution = distribution_df.head(20)
+    _top_distribution_processed = top_distribution.copy()
+    _top_distribution_processed['Type_Recours'] = _top_distribution_processed['Type_Recours'].str[:22]  # Truncate long names for better display
     
-    # Create pie chart
-    plt.pie(df['count'], labels=df['Type_Decision'], autopct='%1.1f%%', 
-            startangle=90, colors=sns.color_palette('pastel'))
+    # Create bar plot
+    ax = sns.barplot(data=_top_distribution_processed, x='count', y='Type_Recours', palette='coolwarm', hue='Type_Recours', legend=False)
+    sns.despine(left=True, bottom=True)
     
-    plt.title('Distribution of Decision Types', fontsize=16)
+    plt.title('Distribution of Recours Types', fontsize=16)
+    plt.xlabel('Number of Recours', fontsize=12)
+    plt.ylabel('Recours Type', fontsize=12)
     plt.tight_layout()
     
+    for i, v in enumerate(_top_distribution_processed['count']):
+        ax.text(v + 5, i, str(v), color='black', fontsize=10)
     # Save if output path provided
     if output_path:
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=300, bbox_inches='tight', transparent=True)
         plt.close()
     
     return plt.gcf()

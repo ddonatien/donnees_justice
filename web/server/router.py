@@ -4,8 +4,8 @@ from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import polars as pl
-from analytics.metrics import compute_summary, compute_jurisdiction_distribution, compute_solution_distribution
-from analytics.plots import plot_jurisdiction_distribution, plot_solution_distribution, plot_decision_type_pie
+from analytics.metrics import compute_summary, compute_jurisdiction_distribution, compute_solution_distribution, compute_recours_type_distribution
+from analytics.plots import plot_jurisdiction_distribution, plot_solution_distribution, plot_recours_type_distribution
 import os
 import json
 
@@ -36,14 +36,13 @@ def generate_plots(df: pl.DataFrame = None, prefix: str = ""):
         # Compute distributions
         jurisdiction_dist = compute_jurisdiction_distribution(df)
         solution_dist = compute_solution_distribution(df)
+        recours_types_dist = compute_recours_type_distribution(df)
         
         # Generate plots
-        plot_jurisdiction_distribution(jurisdiction_dist, f'analytics/{prefix}jurisdiction_distribution.png')
-        plot_solution_distribution(solution_dist, f'analytics/{prefix}solution_distribution.png')
+        plot_jurisdiction_distribution(jurisdiction_dist, f'analytics/{prefix}jurisdiction_distribution.svg')
+        plot_solution_distribution(solution_dist, f'analytics/{prefix}solution_distribution.svg')
+        plot_recours_type_distribution(recours_types_dist, f'analytics/{prefix}recours_type_distribution.svg')
         
-        # Generate decision type pie chart
-        decision_types_df = df['Type_Decision'].value_counts().to_pandas()
-        plot_decision_type_pie(decision_types_df, f'analytics/{prefix}decision_type_pie.png')
         
         print("✅ Plots generated successfully")
         
@@ -51,7 +50,8 @@ def generate_plots(df: pl.DataFrame = None, prefix: str = ""):
         print(f"❌ Error generating plots: {e}")
         print(traceback.format_exc())
 
-def apply_filters(df: pl.DataFrame, decision_type: str = None, solution: str = None, jurisdiction: str = None) -> pl.DataFrame:
+def apply_filters(df: pl.DataFrame, decision_type: str = None, recours_type: str = None,
+                  solution: str = None, jurisdiction: str = None, start_date: str = None, end_date: str = None) -> pl.DataFrame:
     """
     Apply filters to the dataframe based on selected criteria
     """
@@ -60,11 +60,20 @@ def apply_filters(df: pl.DataFrame, decision_type: str = None, solution: str = N
     if decision_type and decision_type != "all":
         filtered_df = filtered_df.filter(pl.col('Type_Decision') == decision_type)
     
+    if recours_type and recours_type != "all":
+        filtered_df = filtered_df.filter(pl.col('Type_Recours') == recours_type)
+    
     if solution and solution != "all":
         filtered_df = filtered_df.filter(pl.col('Solution') == solution)
     
     if jurisdiction and jurisdiction != "all":
         filtered_df = filtered_df.filter(pl.col('Nom_Juridiction') == jurisdiction)
+    
+    if start_date:
+        filtered_df = filtered_df.filter(pl.col('Date_Lecture') >= start_date)
+
+    if end_date:
+        filtered_df = filtered_df.filter(pl.col('Date_Lecture') <= end_date)
     
     return filtered_df
 
@@ -74,6 +83,7 @@ def get_filter_options(df: pl.DataFrame) -> dict:
     """
     return {
         'decision_types': ['all'] + df['Type_Decision'].unique().to_list(),
+        'recours_types': ['all'] + df['Type_Recours'].unique().to_list(),
         'solutions': ['all'] + df['Solution'].unique().to_list(),
         'jurisdictions': ['all'] + df['Nom_Juridiction'].unique().to_list()
     }
@@ -108,9 +118,9 @@ async def read_root(request: Request):
             "summary": summary,
             "jurisdiction_dist": jurisdiction_dist.head(10),
             "solution_dist": solution_dist.head(10),
-            "jurisdiction_plot": "/plots/jurisdiction_distribution.png",
-            "solution_plot": "/plots/solution_distribution.png",
-            "type_pie": "/plots/decision_type_pie.png"
+            "jurisdiction_plot": "/plots/jurisdiction_distribution.svg",
+            "solution_plot": "/plots/solution_distribution.svg",
+            "type_plot": "/plots/recours_type_distribution.svg"
         }
         
         return templates.TemplateResponse("dashboard.html", context)
@@ -179,8 +189,11 @@ async def apply_filters_endpoint(
     url_path = urlparse(request.headers['hx-current-url']).path
     form_data = await request.form()
     decision_type = form_data.get("decision_type", "all")
+    recours_type = form_data.get("recours_type", "all")
     solution = form_data.get("solution", "all")
     jurisdiction = form_data.get("jurisdiction", "all")
+    start_date = form_data.get("start_date", None)
+    end_date = form_data.get("end_date", None)
     """
     Apply filters and return filtered data
     """
@@ -194,9 +207,8 @@ async def apply_filters_endpoint(
             df = pl.read_parquet('data/clean/court_decisions.parquet')
         
         # Apply filters
-        filtered_df = apply_filters(df, decision_type, solution, jurisdiction)
-
-        generate_plots(filtered_df, prefix="filtered_")
+        filtered_df = apply_filters(df, decision_type, recours_type, solution, jurisdiction, start_date, end_date)
+        generate_plots(filtered_df, prefix=f"{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_")
         
         # Compute statistics
         summary = compute_summary(filtered_df)
@@ -219,9 +231,9 @@ async def apply_filters_endpoint(
                 "summary": summary,
                 "jurisdiction_dist": jurisdiction_dist.head(10),
                 "solution_dist": solution_dist.head(10),
-                "jurisdiction_plot": f"/plots/filtered_jurisdiction_distribution.png",
-                "solution_plot": f"/plots/filtered_solution_distribution.png",
-                "type_pie": f"/plots/filtered_decision_type_pie.png"
+                "jurisdiction_plot": f"/plots/filtered_jurisdiction_distribution.svg",
+                "solution_plot": f"/plots/filtered_solution_distribution.svg",
+                "type_plot": f"/plots/filtered_recours_type_distribution.svg"
             }
             
             return templates.TemplateResponse("dashboard_content.html", context)

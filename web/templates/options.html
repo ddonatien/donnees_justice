@@ -8,6 +8,15 @@
 </div>
 
 <div class="filter-group">
+    <label for="recours_type">Recours Type:</label>
+    <select id="recours_type" name="recours_type">
+        {% for v in values['recours_types'] %}
+            <option value="{{ v }}">{{ v }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="filter-group">
     <label for="solution">Solution:</label>
     <select id="solution" name="solution">
         {% for v in values['solutions'] %}
@@ -23,4 +32,14 @@
             <option value="{{ v }}">{{ v }}</option>
         {% endfor %}
     </select>
+</div>
+
+<div class="filter-group">
+    <label for="start_date">Start Date:</label>
+    <input type="date" id="start_date" name="start_date">
+</div>
+
+<div class="filter-group">
+    <label for="end_date">End Date:</label>
+    <input type="date" id="end_date" name="end_date">
 </div>

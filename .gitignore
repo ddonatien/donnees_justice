@@ -18,3 +18,4 @@ __pycache__/
 # Ignore generated files
 *.log
 analytics/*.png
+analytics/*.svg
