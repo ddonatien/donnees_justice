@@ -43,7 +43,6 @@ def generate_plots(df: pl.DataFrame = None, prefix: str = ""):
         plot_solution_distribution(solution_dist, f'analytics/{prefix}solution_distribution.svg')
         plot_recours_type_distribution(recours_types_dist, f'analytics/{prefix}recours_type_distribution.svg')
         
-        
         print("✅ Plots generated successfully")
         
     except Exception as e:
@@ -58,16 +57,19 @@ def apply_filters(df: pl.DataFrame, decision_type: str = None, recours_type: str
     filtered_df = df
     
     if decision_type and decision_type != "all":
-        filtered_df = filtered_df.filter(pl.col('Type_Decision') == decision_type)
+        filtered_df = filtered_df.filter(pl.col('Type_Decision').str.to_lowercase() == decision_type.lower())
     
     if recours_type and recours_type != "all":
-        filtered_df = filtered_df.filter(pl.col('Type_Recours') == recours_type)
+        print(f"Filtering by recours type: {recours_type}")
+        filtered_df = filtered_df.filter(pl.col('Type_Recours').str.to_lowercase() == recours_type.lower())
     
     if solution and solution != "all":
-        filtered_df = filtered_df.filter(pl.col('Solution') == solution)
+        print(f"Filtering by solution: {solution}")
+        filtered_df = filtered_df.filter(pl.col('Solution').str.to_lowercase() == solution.lower())
     
     if jurisdiction and jurisdiction != "all":
-        filtered_df = filtered_df.filter(pl.col('Nom_Juridiction') == jurisdiction)
+        print(f"Filtering by jurisdiction: {jurisdiction}")
+        filtered_df = filtered_df.filter(pl.col('Nom_Juridiction').str.to_lowercase() == jurisdiction.lower())
     
     if start_date:
         filtered_df = filtered_df.filter(pl.col('Date_Lecture') >= start_date)
@@ -82,10 +84,10 @@ def get_filter_options(df: pl.DataFrame) -> dict:
     Get available options for all filters
     """
     return {
-        'decision_types': ['all'] + df['Type_Decision'].unique().to_list(),
-        'recours_types': ['all'] + df['Type_Recours'].unique().to_list(),
-        'solutions': ['all'] + df['Solution'].unique().to_list(),
-        'jurisdictions': ['all'] + df['Nom_Juridiction'].unique().to_list()
+        'decision_types': ['all'] + sorted(df['Type_Decision'].str.to_lowercase().unique().to_list()),
+        'recours_types': ['all'] + sorted(df['Type_Recours'].str.to_lowercase().unique().to_list()),
+        'solutions': ['all'] + sorted(df['Solution'].str.to_lowercase().unique().to_list()),
+        'jurisdictions': ['all'] + sorted(df['Nom_Juridiction'].str.to_lowercase().unique().to_list())
     }
 
 # Generate plots when module is loaded (on server start/reload)
@@ -231,9 +233,9 @@ async def apply_filters_endpoint(
                 "summary": summary,
                 "jurisdiction_dist": jurisdiction_dist.head(10),
                 "solution_dist": solution_dist.head(10),
-                "jurisdiction_plot": f"/plots/filtered_jurisdiction_distribution.svg",
-                "solution_plot": f"/plots/filtered_solution_distribution.svg",
-                "type_plot": f"/plots/filtered_recours_type_distribution.svg"
+                "jurisdiction_plot": f"/plots/{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_jurisdiction_distribution.svg",
+                "solution_plot": f"/plots/{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_solution_distribution.svg",
+                "type_plot": f"/plots/{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_recours_type_distribution.svg"
             }
             
             return templates.TemplateResponse("dashboard_content.html", context)
