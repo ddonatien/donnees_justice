@@ -810,6 +810,7 @@ dependencies = [
  "glob",
  "polars 0.36.2",
  "quick-xml",
+ "regex",
  "serde",
 ]
 

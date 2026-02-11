@@ -76,3 +76,79 @@ def compute_recours_type_distribution(df: pl.DataFrame) -> pd.DataFrame:
         Pandas DataFrame with recours type distribution
     """
     return df.group_by('Type_Recours').count().sort('count', descending=True).to_pandas()   
+
+def aggregate_entry_by_month(df: pl.DataFrame, entry_name: str, prop: bool) -> pd.DataFrame:
+    """
+    Compute proportions of decisions by month.
+    
+    Args:
+        df: Polars DataFrame containing court decisions
+        
+    Returns:
+        Pandas DataFrame with proportions by month
+    """
+    _processed_df = df.with_columns(
+        pl.col("Date_Lecture").str.to_date().alias("date")
+    ).sort("date")
+    _processed_df = _processed_df.with_columns(
+        pl.col(entry_name).str.to_lowercase().alias(entry_name)
+    )
+    counts = (
+        _processed_df.with_columns(month=pl.col("date").dt.truncate("1mo"))
+        .group_by(["month", entry_name])
+        .agg(pl.count().alias("count"))
+    )
+    wide = (
+        counts
+        .pivot(
+            index="month",
+            columns=entry_name,
+            values="count",
+            aggregate_function="sum"
+        )
+        .fill_null(0)
+    )
+    if prop:
+        proportions = wide.with_columns(
+            pl.exclude("month") /
+            pl.sum_horizontal(pl.exclude("month"))
+        )
+        return proportions.to_pandas()
+    else:
+        return wide.to_pandas()
+
+def aggregate_entry_by_jurisdiction(df: pl.DataFrame, entry_name: str, prop: bool) -> pd.DataFrame:
+    """
+    Compute proportions of decisions by jurisdiction.
+    
+    Args:
+        df: Polars DataFrame containing court decisions
+        
+    Returns:
+        Pandas DataFrame with proportions by jurisdiction
+    """
+    _processed_df = df.with_columns(
+        pl.col("Date_Lecture").str.to_date().alias("date")
+    ).sort("date")
+    _processed_df = _processed_df.with_columns(
+        pl.col(entry_name).str.to_lowercase().alias(entry_name)
+    )
+    _processed_df = _processed_df.group_by(["Nom_Juridiction", entry_name]).agg(pl.count().alias("count"))
+    wide = (
+        _processed_df
+        .pivot(
+            index="Nom_Juridiction",
+            columns=entry_name,
+            values="count",
+            aggregate_function="sum"
+        )
+        .fill_null(0)
+    )
+    if prop:
+        proportions = wide.with_columns(
+            pl.exclude("Nom_Juridiction") /
+            pl.sum_horizontal(pl.exclude("Nom_Juridiction"))
+        )
+        return proportions.to_pandas()
+    else:
+        return wide.to_pandas()

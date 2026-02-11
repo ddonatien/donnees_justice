@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="card">
-        <h2>📊 Dashboard Overview</h2>
-        <p>Summary statistics and visualizations of French administrative court decisions</p>
-    </div>
-    
     <div id="filterResults">
         <!-- Key Statistics -->
         <div class="stats-grid">
@@ -33,19 +28,44 @@
         <!-- Visualizations -->
         <div class="plot-grid">
             <div class="plot-container">
-                <h3 class="plot-title">📍 Jurisdiction Distribution</h3>
+                <h3 class="plot-title">Top 10 Jurisdiction</h3>
                 <img src="{{ jurisdiction_plot }}" alt="Jurisdiction Distribution">
             </div>
             
             <div class="plot-container">
-                <h3 class="plot-title">⚖️ Solution Distribution</h3>
+                <h3 class="plot-title">Top 10 Solutions</h3>
                 <img src="{{ solution_plot }}" alt="Solution Distribution">
             </div>
             
             <div class="plot-container">
-                <h3 class="plot-title">📊 Recours Type Distribution</h3>
+                <h3 class="plot-title">Top 10 Recours</h3>
                 <img src="{{ type_plot }}" alt="Recours Type Distribution">
             </div>
+
+            <div class="plot-container">
+                <h3 class="plot-title">📊 Recours by Month</h3>
+                    {{ recours_by_month_html | safe }}
+            </div>
+
+            <div class="plot-container">
+                <h3 class="plot-title">📊 Jurisdiction by Month</h3>
+                    {{ jurisdiction_by_month_html | safe }}
+            </div>  
+
+            <div class="plot-container">
+                <h3 class="plot-title">📊 Solution by Month</h3>
+                    {{ solution_by_month_html | safe }}
+            </div>
+
+            <div class="plot-container">
+                <h3 class="plot-title">📊 Ratio "Excès de pouvoir" / Total Recours</h3>
+                    {{ recours_by_jurisdiction_html | safe }}
+            </div>
+
+            <div class="plot-container">
+                <h3 class="plot-title">📊 Ratio "Rejet" / Total Solutions</h3>
+                    {{ solution_by_jurisdiction_html | safe }}
+            </div>  
         </div>
         
         <!-- Data Tables -->
@@ -83,6 +103,28 @@
                     <tr>
                         <td>{{ row['Solution'] }}</td>
                         <td>{{ row['count'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>📰 Publication Codes Distribution</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Publication Code</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pub_code, count in summary.publication_codes.items() %}
+                    <tr>
+                        <td>{{ pub_code }}</td>
+                        <td>{{ count }}</td>
+                        <td>{{ "%.1f"|format((count / summary.total_decisions * 100)) }}%</td>
                     </tr>
                     {% endfor %}
                 </tbody>

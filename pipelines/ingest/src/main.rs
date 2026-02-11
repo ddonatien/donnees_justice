@@ -4,6 +4,7 @@ use polars::prelude::*;
 use quick_xml::de::from_str;
 use serde::Deserialize;
 use std::path::Path;
+use regex::Regex;
 
 fn default_string() -> String {
     "Unknown".to_string()
@@ -98,6 +99,7 @@ fn find_xml_files(data_dir: &str) -> Result<Vec<String>> {
 fn create_dataframe(documents: Vec<Document>) -> Result<DataFrame> {
     let mut identification = Vec::new();
     let mut date_mise_jour = Vec::new();
+    let mut source = Vec::new();
     let mut code_juridiction = Vec::new();
     let mut nom_juridiction = Vec::new();
     let mut numero_dossier = Vec::new();
@@ -106,10 +108,14 @@ fn create_dataframe(documents: Vec<Document>) -> Result<DataFrame> {
     let mut type_recours = Vec::new();
     let mut code_publication = Vec::new();
     let mut solution = Vec::new();
-    
+
+    let re = Regex::new(r"[A-Z]+")?;
+
     for doc in documents {
-        identification.push(doc.donnees_techniques.identification);
         date_mise_jour.push(doc.donnees_techniques.date_mise_jour);
+        identification.push(doc.donnees_techniques.identification);
+        source.push(re.find(&doc.dossier.code_juridiction)
+            .map_or("Unknown".to_string(), |m| m.as_str().to_string()));
         code_juridiction.push(doc.dossier.code_juridiction);
         nom_juridiction.push(doc.dossier.nom_juridiction);
         numero_dossier.push(doc.dossier.numero_dossier);
@@ -123,6 +129,7 @@ fn create_dataframe(documents: Vec<Document>) -> Result<DataFrame> {
     let df = DataFrame::new(vec![
         Series::new("Identification", identification),
         Series::new("Date_Mise_Jour", date_mise_jour),
+        Series::new("Source", source),
         Series::new("Code_Juridiction", code_juridiction),
         Series::new("Nom_Juridiction", nom_juridiction),
         Series::new("Numero_Dossier", numero_dossier),

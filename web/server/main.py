@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from . import router
 
-app = FastAPI(title="French Court Decisions Analytics", 
+app = FastAPI(title="French Court Decisions Stats Explorer", 
               description="Web interface for analyzing French administrative court decisions",
               version="0.1.0")
 

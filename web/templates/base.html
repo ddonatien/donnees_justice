@@ -235,6 +235,71 @@
             margin-bottom: 15px;
             border-left: 3px solid #0066cc;
         }
+
+        .svg-container {
+            width: 100%;
+            height: auto;
+        }
+
+        .svg-container svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        #PolyCollection_1:hover path {
+            fill: #00ff00 !important;
+            stroke: #333;
+            stroke-width: 1px;
+        }
+
+        #PolyCollection_2:hover path {
+            fill: #00ff00 !important;
+            stroke: #333;
+            stroke-width: 1px;
+        }
+
+        #PolyCollection_2:hover path {
+            fill: #00ff00 !important;
+            stroke: #333;
+            stroke-width: 1px;
+        }
+
+        #PolyCollection_3:hover path {
+            fill: #00ff00 !important;
+            stroke: #333;
+            stroke-width: 1px;
+        }
+
+        #PolyCollection_4:hover path {
+            fill: #00ff00 !important;
+            stroke: #333;
+            stroke-width: 1px;
+        }
+
+        #PolyCollection_5:hover path {
+            fill: #00ff00 !important;
+            stroke: #333;
+            stroke-width: 1px;
+        }
+
+        #PolyCollection_6:hover path {
+            fill: #00ff00 !important;
+            stroke: #333;
+            stroke-width: 1px;
+        }
+        #tooltip {
+            position: fixed;          /* important */
+            pointer-events: none;     /* never block the mouse */
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
         
         @media (max-width: 768px) {
             .stats-grid {
@@ -244,18 +309,12 @@
     </style>
 </head>
 <body>
+    <div id="tooltip">x=</div>
     <header>
-        <h1>🏛️ French Court Decisions Analytics</h1>
-        <p>Analysis of French Administrative Court Decisions</p>
+        <h1 style="color: white;">French Administrative Courts Decisions Analytics</h1>
     </header>
     
     <div class="container">
-        <nav>
-            <a href="/">📊 Dashboard</a>
-            <a href="/stats">📈 Statistics</a>
-            <a href="/health">❤️ Health</a>
-        </nav>
-        
         <!-- Filter Form -->
         <div class="filter-form">
             <h3>🔍 Filter Data</h3>
@@ -288,10 +347,17 @@
                             <option value="all">All Jurisdictions</option>
                         </select>
                     </div>
+                    
+                    <div class="filter-group">
+                        <label for="source">Source:</label>
+                        <select id="source" name="source">
+                            <option value="all">All Sources</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <button type="submit" class="filter-button">Apply Filters</button>
-                <button type="button" class="filter-button reset-button" onclick="resetFilters()">Reset</button>
+                <button type="reset" class="filter-button reset-button">Reset</button>
             </form>
         </div>
         
@@ -299,7 +365,7 @@
     </div>
     
     <footer>
-        <p>French Court Decisions Analytics © 2024 | Data processed from French Administrative Courts</p>
+        <p>Made by <a href="https://ddonatien.github.io">Meee</a> | Data processed from 🔗<a href="https://opendata.justice-administrative.fr"> Open Data | Justice Administrative</a></p>
     </footer>
 </body>
 </html>

@@ -35,6 +35,15 @@
 </div>
 
 <div class="filter-group">
+    <label for="source">Source:</label>
+    <select id="source" name="source">
+        {% for v in values['sources'] %}
+            <option value="{{ v }}">{{ v }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="filter-group">
     <label for="start_date">Start Date:</label>
     <input type="date" id="start_date" name="start_date">
 </div>

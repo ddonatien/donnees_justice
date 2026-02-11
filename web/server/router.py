@@ -4,8 +4,11 @@ from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import polars as pl
-from analytics.metrics import compute_summary, compute_jurisdiction_distribution, compute_solution_distribution, compute_recours_type_distribution
-from analytics.plots import plot_jurisdiction_distribution, plot_solution_distribution, plot_recours_type_distribution
+from analytics.metrics import (compute_summary, compute_jurisdiction_distribution,
+                               compute_solution_distribution, compute_recours_type_distribution,
+                               aggregate_entry_by_month, aggregate_entry_by_jurisdiction)
+from analytics.plots import ( plot_jurisdiction_distribution, plot_solution_distribution,
+                             plot_recours_type_distribution, stacked_plot_by_month, scatter_hist_by_jurisdiction)
 import os
 import json
 
@@ -37,11 +40,21 @@ def generate_plots(df: pl.DataFrame = None, prefix: str = ""):
         jurisdiction_dist = compute_jurisdiction_distribution(df)
         solution_dist = compute_solution_distribution(df)
         recours_types_dist = compute_recours_type_distribution(df)
+        recours_by_month = aggregate_entry_by_month(df, entry_name="Type_Recours", prop=True)
+        solution_by_month = aggregate_entry_by_month(df, entry_name="Solution", prop=True)
+        jurisdiction_by_month = aggregate_entry_by_month(df, entry_name="Nom_Juridiction", prop=True)
+        recours_by_juri = aggregate_entry_by_jurisdiction(df, entry_name="Type_Recours", prop=True)
+        solution_by_juri = aggregate_entry_by_jurisdiction(df, entry_name="Solution", prop=True)
         
         # Generate plots
         plot_jurisdiction_distribution(jurisdiction_dist, f'analytics/{prefix}jurisdiction_distribution.svg')
         plot_solution_distribution(solution_dist, f'analytics/{prefix}solution_distribution.svg')
         plot_recours_type_distribution(recours_types_dist, f'analytics/{prefix}recours_type_distribution.svg')
+        stacked_plot_by_month(recours_by_month, f'analytics/{prefix}recours_by_month.svg')  
+        stacked_plot_by_month(solution_by_month, f'analytics/{prefix}solution_by_month.svg')
+        stacked_plot_by_month(jurisdiction_by_month, f'analytics/{prefix}jurisdiction_by_month.svg')
+        scatter_hist_by_jurisdiction(recours_by_juri, query="excès de pouvoir", output_path=f'analytics/{prefix}recours_by_jurisdiction.svg')
+        scatter_hist_by_jurisdiction(solution_by_juri, query="rejet", output_path=f'analytics/{prefix}solution_by_jurisdiction.svg')
         
         print("✅ Plots generated successfully")
         
@@ -50,7 +63,8 @@ def generate_plots(df: pl.DataFrame = None, prefix: str = ""):
         print(traceback.format_exc())
 
 def apply_filters(df: pl.DataFrame, decision_type: str = None, recours_type: str = None,
-                  solution: str = None, jurisdiction: str = None, start_date: str = None, end_date: str = None) -> pl.DataFrame:
+                  solution: str = None, jurisdiction: str = None, source: str = None,
+                  start_date: str = None, end_date: str = None) -> pl.DataFrame:
     """
     Apply filters to the dataframe based on selected criteria
     """
@@ -77,6 +91,10 @@ def apply_filters(df: pl.DataFrame, decision_type: str = None, recours_type: str
     if end_date:
         filtered_df = filtered_df.filter(pl.col('Date_Lecture') <= end_date)
     
+    if source and source != "all":
+        print(f"Filtering by source: {source}")
+        filtered_df = filtered_df.filter(pl.col('Source').str.to_lowercase() == source.lower())
+    
     return filtered_df
 
 def get_filter_options(df: pl.DataFrame) -> dict:
@@ -87,8 +105,20 @@ def get_filter_options(df: pl.DataFrame) -> dict:
         'decision_types': ['all'] + sorted(df['Type_Decision'].str.to_lowercase().unique().to_list()),
         'recours_types': ['all'] + sorted(df['Type_Recours'].str.to_lowercase().unique().to_list()),
         'solutions': ['all'] + sorted(df['Solution'].str.to_lowercase().unique().to_list()),
-        'jurisdictions': ['all'] + sorted(df['Nom_Juridiction'].str.to_lowercase().unique().to_list())
+        'jurisdictions': ['all'] + sorted(df['Nom_Juridiction'].str.to_lowercase().unique().to_list()),
+        'sources': ['all'] + sorted(df['Source'].str.to_lowercase().unique().to_list())
     }
+
+def get_svg_content(svg_path: str) -> str:
+    """
+    Read SVG file content and return as string
+    """
+    try:
+        with open(f"analytics/{svg_path}", "r") as f:
+            return f.read()
+    except Exception as e:
+        print(f"Error reading SVG file {svg_path}: {e}")
+        return ""
 
 # Generate plots when module is loaded (on server start/reload)
 if not os.environ.get('TESTING'):
@@ -122,7 +152,12 @@ async def read_root(request: Request):
             "solution_dist": solution_dist.head(10),
             "jurisdiction_plot": "/plots/jurisdiction_distribution.svg",
             "solution_plot": "/plots/solution_distribution.svg",
-            "type_plot": "/plots/recours_type_distribution.svg"
+            "type_plot": "/plots/recours_type_distribution.svg",
+            "recours_by_month_html": get_svg_content("recours_by_month.html"),
+            "solution_by_month_html": get_svg_content("solution_by_month.html"),
+            "jurisdiction_by_month_html": get_svg_content("jurisdiction_by_month.html"),
+            "recours_by_jurisdiction_html": get_svg_content("recours_by_jurisdiction.html"),
+            "solution_by_jurisdiction_html": get_svg_content("solution_by_jurisdiction.html")
         }
         
         return templates.TemplateResponse("dashboard.html", context)
@@ -194,6 +229,7 @@ async def apply_filters_endpoint(
     recours_type = form_data.get("recours_type", "all")
     solution = form_data.get("solution", "all")
     jurisdiction = form_data.get("jurisdiction", "all")
+    source = form_data.get("source", "all")
     start_date = form_data.get("start_date", None)
     end_date = form_data.get("end_date", None)
     """
@@ -209,8 +245,8 @@ async def apply_filters_endpoint(
             df = pl.read_parquet('data/clean/court_decisions.parquet')
         
         # Apply filters
-        filtered_df = apply_filters(df, decision_type, recours_type, solution, jurisdiction, start_date, end_date)
-        generate_plots(filtered_df, prefix=f"{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_")
+        filtered_df = apply_filters(df, decision_type, recours_type, solution, jurisdiction, source, start_date, end_date)
+        generate_plots(filtered_df, prefix=f"{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_{source}_")
         
         # Compute statistics
         summary = compute_summary(filtered_df)
@@ -233,9 +269,14 @@ async def apply_filters_endpoint(
                 "summary": summary,
                 "jurisdiction_dist": jurisdiction_dist.head(10),
                 "solution_dist": solution_dist.head(10),
-                "jurisdiction_plot": f"/plots/{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_jurisdiction_distribution.svg",
-                "solution_plot": f"/plots/{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_solution_distribution.svg",
-                "type_plot": f"/plots/{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_recours_type_distribution.svg"
+                "jurisdiction_plot": f"/plots/{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_{source}_jurisdiction_distribution.svg",
+                "solution_plot": f"/plots/{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_{source}_solution_distribution.svg",
+                "type_plot": f"/plots/{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_{source}_recours_type_distribution.svg",
+                "recours_by_month_html": get_svg_content(f"{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_{source}_recours_by_month.html"),
+                "solution_by_month_html": get_svg_content(f"{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_{source}_solution_by_month.html"),
+                "jurisdiction_by_month_html": get_svg_content(f"{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_{source}_jurisdiction_by_month.html") ,
+                "recours_by_jurisdiction_html": get_svg_content(f"{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_{source}_recours_by_jurisdiction.html"),
+                "solution_by_jurisdiction_html": get_svg_content(f"{decision_type}_{recours_type}_{solution}_{jurisdiction}_{start_date}_{end_date}_{source}_solution_by_jurisdiction.html"),
             }
             
             return templates.TemplateResponse("dashboard_content.html", context)
