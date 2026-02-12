@@ -1,6 +1,6 @@
 import traceback
 from urllib.parse import urlparse
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import polars as pl
@@ -165,34 +165,6 @@ async def read_root(request: Request):
     except Exception as e:
         return HTMLResponse(content=f"<h1>Error</h1><p>{str(e)}</p>", status_code=500)
 
-@router.get("/stats", response_class=HTMLResponse)
-async def get_stats(request: Request):
-    """
-    Detailed statistics page
-    """
-    try:
-        # Load data with configurable sample size
-        sample_size = os.environ.get('DATA_SAMPLE_SIZE')
-        
-        if sample_size and int(sample_size) > 0:
-            df = pl.read_parquet('data/clean/court_decisions.parquet', n_rows=int(sample_size))
-        else:
-            df = pl.read_parquet('data/clean/court_decisions.parquet')
-        
-        # Compute statistics
-        summary = compute_summary(df)
-        
-        context = {
-            "request": request,
-            "title": "Detailed Statistics",
-            "summary": summary
-        }
-        
-        return templates.TemplateResponse("stats.html", context)
-        
-    except Exception as e:
-        return HTMLResponse(content=f"<h1>Error</h1><p>{str(e)}</p>", status_code=500)
-
 @router.get("/filter-options", response_class=HTMLResponse)
 async def get_filter_options_endpoint(request: Request):
     """
@@ -285,10 +257,3 @@ async def apply_filters_endpoint(
         
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
-
-@router.get("/health")
-async def health_check():
-    """
-    Health check endpoint
-    """
-    return {"status": "healthy", "service": "court-decisions-analytics"}
