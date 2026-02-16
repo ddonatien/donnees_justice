@@ -4,6 +4,7 @@ CLAUDE.md
 # Sample data files
 PROJECT_SPEC.txt
 # Data output directories
+/data/**/raw/**
 /data/**/clean/**
 /data/**/intermediate/**
 # Build artifacts
