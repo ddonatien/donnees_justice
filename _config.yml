@@ -1,0 +1,34 @@
+# Jekyll configuration for GitHub Pages
+# Exclude directories and files that shouldn't be processed by Jekyll
+
+exclude:
+  - data/
+  - pipelines/
+  - Cargo.toml
+  - Cargo.lock
+  - target/
+  - analytics/metrics/
+  - analytics/plots/
+  - analytics/requirements.txt
+  - web/
+  - shared/
+  - scripts/
+  - configs/
+  - .gitignore
+  - README.md
+  - CLAUDE.md
+  - PROJECT_SPEC.txt
+
+# Only process index.html as the main page
+keep_files:
+  - index.html
+  - analytics
+
+# Don't use Jekyll's built-in theme processing
+theme: jekyll-theme-primer
+
+# Disable incremental builds
+incremental: false
+
+# Set safe mode to prevent potential issues
+safe: true
