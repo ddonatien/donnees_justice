@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="./web/static/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./web/static/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./web/static/images/favicon-16x16.png">
     <title>French Court Decisions Analytics Report</title>
     <style>
         :root {
@@ -123,8 +126,25 @@
             min-width: 300px;
         }
 
+        .subsection-pair {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+
+        .subsection-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .subsection-plot {
+            flex: 1;
+            min-width: 300px;
+        }
+
         @media (max-width: 968px) {
-            .section-content {
+            .section-content, .subsection-pair {
                 flex-direction: column;
             }
         }
@@ -289,6 +309,8 @@
             <h1>French Administrative Courts Analytics </h1>
         </header>
 
+        See code and data explorer on <a href="https://github.com/ddonatien/donnees_justice" target="_blank" rel="noopener noreferrer">GitHub</a>.
+
         <div class="report-content">
             <section class="section">
                 <h2 class="section-title">Data Summary</h2>
@@ -299,32 +321,43 @@
             <section class="section">
                 <h2 class="section-title">Global numbers</h2>
 
-                <div class="section-content">
-                    <div class="section-text">
+                <div class="subsection-pair">
+                    <div class="subsection-text">
                         <h3 class="section-subtitle">Jurisdiction Distribution</h3>
                         <p>Paris is overly represented compared to other jurisdictions, handling over 10% of all cases.</br>Moreover, 5 out of the Top 10 jurisdictions by volume (Paris, Cergy-Pontoise, Montreuil, Melun and Versailles) are in Ile-de-France, the capital's region.</p>
                         <p>This reflects the status of Paris as the capital, but also the centralisation of administrative functions in France. Ile-de-France is home to 18% of the French population.</p>
+                    </div>
 
+                    <div class="subsection-plot">
+                        <div class="plot-container">
+                            <h4>Top 10 Jurisdictions by Decision Volume</h4>
+                            <img src="./analytics/all_all_all_all___ta_jurisdiction_distribution.svg" alt="Jurisdiction Distribution">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection-pair">
+                    <div class="subsection-text">
                         <h3 class="section-subtitle">Recours (Appeal) Distribution</h3>
-
                         <p>The distribution of appeals is also heavily skewed towards one category: "Excès de pouvoir" (Excess of Power), representing 67% of all cases.</p>
+                    </div>
 
+                    <div class="subsection-plot">
+                        <div class="plot-container">
+                            <h4>Top 10 Recours by Decision Volume</h4>
+                            <img src="./analytics/all_all_all_all___ta_recours_type_distribution.svg" alt="Recours by Jurisdiction">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection-pair">
+                    <div class="subsection-text">
                         <h3 class="section-subtitle">Solution Distribution</h3>
                         <p>Once again, a single category is overly represented in the data: "Rejet" (Rejected). This ruling is 4 times more present than the second most common ruling: "Satisfaction partielle" (Partial Satisfaction).</p>
                         <p>4 other types of rejections are present in the Top 10 of solutions. Together, these 5 types of rejections represent almost 56% of the data.</p>
                     </div>
 
-                    <div class="section-plots">
-                        <div class="plot-container">
-                            <h4>Top 10 Jurisdictions by Decision Volume</h4>
-                            <img src="./analytics/all_all_all_all___ta_jurisdiction_distribution.svg" alt="Jurisdiction Distribution">
-                        </div>
-
-                        <div class="plot-container">
-                            <h4>Top 10 Recours by Decision Volume</h4>
-                            <img src="./analytics/all_all_all_all___ta_recours_type_distribution.svg" alt="Recours by Jurisdiction">
-                        </div>
-
+                    <div class="subsection-plot">
                         <div class="plot-container">
                             <h4>Top 10 Solutions by Decision Volume</h4>
                             <img src="./analytics/all_all_all_all___ta_solution_distribution.svg" alt="Solution Distribution">
@@ -336,148 +369,92 @@
             <section class="section">
                 <h2 class="section-title">Temporal Trends</h2>
 
-                <div class="section-content">
-                    <div class="section-text">
-                        <p>The dataset includes eight distinct decision types, each representing different procedural categories within the French administrative justice system. This analysis examines the distribution and characteristics of these decision types.</p>
-
-                        <div class="key-findings">
-                            <h3>Key Findings</h3>
-                            <ul class="findings-list">
-                                <li>Décision represents the majority of case types at 85%</li>
-                                <li>Ordonnance cases show specific procedural characteristics</li>
-                                <li>Jugement cases demonstrate distinct resolution patterns</li>
-                                <li>Temporal analysis reveals seasonal variations in decision types</li>
-                            </ul>
-                        </div>
+                <div class="subsection-pair">
+                    <div class="subsection-text">
+                        <h3 class="section-subtitle">Cases by Jurisdiction over time</h3>
+                        <p>The total number of cases have increased by roughly 10% over three years with a notable downwards spike every August which may be due to administrative closures during summer months.</p>
+                        <p>The distribution of cases across the top 5 jurisdictions has remained relatively stable over time. With Paris increasing slightly in comparative volume.</p>
                     </div>
 
-                    <div class="section-plots">
+                    <div class="subsection-plot">
                         <div class="plot-container">
-                            <h4>Distributions by month</h4>
                             <iframe src="analytics/all_all_all_all___ta_jurisdiction_by_month.html" width="600" height="400"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection-pair">
+                    <div class="subsection-text">
+                        <h3 class="section-subtitle">Recours over time</h3>
+                        <p>The proportions of recours types have remained relatively stable over time, with "Excès de pouvoir" (Excess of Power) consistently representing the largest category.</p>
+                    </div>
+
+                    <div class="subsection-plot">
+                        <div class="plot-container">
                             <iframe src="analytics/all_all_all_all___ta_recours_by_month.html" width="600" height="400"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection-pair">
+                    <div class="subsection-text">
+                        <h3 class="section-subtitle">Solutions over time</h3>
+                        <p>The proportions of solution types have remained relatively stable over time, with "Rejet" (Rejected) consistently representing the largest category.</p>
+                    </div>
+
+                    <div class="subsection-plot">
+                        <div class="plot-container">
                             <iframe src="analytics/all_all_all_all___ta_solution_by_month.html" width="600" height="400"></iframe>
                         </div>
                     </div>
                 </div>
+
             </section>
 
             <section class="section">
-                <h2 class="section-title">Solution Outcome Analysis</h2>
+                <h2 class="section-title">Distributions by Jurisdiction</h2>
 
-                <div class="section-content">
-                    <div class="section-text">
-                        <p>Solution outcomes provide critical insights into the resolution patterns of administrative cases. This analysis examines twelve different solution types, ranging from complete rejection to various forms of acceptance and conditional outcomes.</p>
+                <div class="subsection-pair">
+                    <div class="subsection-text">
+                        <p>Having outlaid the global trends and their temporal evolution, we now examine how these trends are represented at the jurisdiction level.</p>
+                    </div>
+                </div>
 
-                        <div class="key-findings">
-                            <h3>Key Findings</h3>
-                            <ul class="findings-list">
-                                <li>Rejet (Rejection) constitutes approximately 60% of all outcomes</li>
-                                <li>Satisfaction totale shows significant variation by case type</li>
-                                <li>Sursis à statuer indicates complex procedural scenarios</li>
-                                <li>Temporal analysis reveals policy impact on outcome distributions</li>
-                            </ul>
-                        </div>
-
-                        <h3 class="section-subtitle">Solution Trends Over Time</h3>
-                        <p>Longitudinal analysis of solution outcomes reveals trends that correlate with legislative changes, policy shifts, and administrative reforms. The monthly data shows consistent patterns with occasional anomalies corresponding to specific legal developments.</p>
+                <div class="subsection-pair">
+                    <div class="subsection-text">
+                        <h3 class="section-subtitle">Ratio "Excès de pouvoir" / Total Recours</h3>
+                        <p>This histogram represents the proportion of the most represented recours "Excès de pouvoir" accross all jurisdictions. Interestingly, the mainland jursidictions are closely grouped around the average.</p>
+                        <p>On the opposite, the overseas territories are sytematically outliers (Martinique is the most similar to the mainland jurisdictions). The caraibean territories show a higher proportion of "Excès de pouvoir" recours, while the other overseas territories show a significantly lower proportion.</p>
+                        <p>Finally, once again Paris shows a distinct pattern compared to the mainland jurisdictions, with a comaratively lower rate of "Excès de pouvoir" recours.</p>
                     </div>
 
-                    <div class="section-plots">
+                    <div class="subsection-plot">
                         <div class="plot-container">
-                            <h4>Solution Type Distribution</h4>
-                            <div class="plot-placeholder">
-                                Bar chart showing distribution of different solution outcomes
-                            </div>
+                            <iframe src="analytics/all_all_all_all___ta_recours_by_jurisdiction.html" width="600" height="400"></iframe>
                         </div>
+                    </div>
+                </div>
 
+                <div class="subsection-pair">
+                    <div class="subsection-text">
+                        <h3 class="section-subtitle">Ratio "Rejet" / Total Solutions</h3>
+                        <p>The distribution of "rejet" vs other solutions is tighter than that of "Excès de pouvoir". The overseas/mainland divide is also less pronounced.</p>
+                        <p>However, the most striking outlier is Mayotte, also one on the strongest outliers in the recours distribution. Indeed, Mayotte shows a "rejet" ratio of almost 60%.</p>
+                    </div>
+
+                    <div class="subsection-plot">
                         <div class="plot-container">
-                            <h4>Solution Outcomes by Month</h4>
-                            <div class="plot-placeholder">
-                                Stacked area chart showing solution trends over time
-                            </div>
+                            <iframe src="analytics/all_all_all_all___ta_solution_by_jurisdiction.html" width="600" height="400"></iframe>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section class="section">
-                <h2 class="section-title">Recours Type Analysis</h2>
-
-                <div class="section-content">
-                    <div class="section-text">
-                        <p>Recours types represent the different procedural avenues available within the French administrative justice system. This analysis examines the distribution and temporal patterns of these procedural types.</p>
-
-                        <div class="key-findings">
-                            <h3>Key Findings</h3>
-                            <ul class="findings-list">
-                                <li>Excès de pouvoir represents the dominant recours type</li>
-                                <li>Plein contentieux shows complex procedural patterns</li>
-                                <li>Question préjudicielle indicates inter-jurisdictional dynamics</li>
-                                <li>Temporal analysis reveals legislative impact on recours distribution</li>
-                            </ul>
-                        </div>
-
-                        <h3 class="section-subtitle">Recours Trends Over Time</h3>
-                        <p>Monthly analysis of recours types demonstrates the dynamic nature of administrative litigation. The data shows how different procedural types fluctuate in response to legal developments and policy changes.</p>
-                    </div>
-
-                    <div class="section-plots">
-                        <div class="plot-container">
-                            <h4>Top Recours Types</h4>
-                            <div class="plot-placeholder">
-                                Bar chart showing most common recours types
-                            </div>
-                        </div>
-
-                        <div class="plot-container">
-                            <h4>Recours Activity by Month</h4>
-                            <div class="plot-placeholder">
-                                Stacked area chart showing recours trends over time
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="section">
-                <div class="conclusion">
-                    <h3>Conclusion and Recommendations</h3>
-
-                    <p>This comprehensive analysis of French administrative court decisions provides valuable insights into the functioning of the administrative justice system. The findings highlight significant patterns in case distribution, outcome determination, and procedural dynamics across multiple jurisdictions.</p>
-
-                    <p>The data reveals both expected patterns and surprising anomalies that warrant further investigation. The temporal analysis demonstrates how administrative justice responds to legislative changes, policy shifts, and societal developments.</p>
-
-                    <h3 class="section-subtitle">Key Recommendations</h3>
-                    <ul class="findings-list">
-                        <li>Enhance data collection for improved temporal analysis</li>
-                        <li>Develop predictive models for case outcome forecasting</li>
-                        <li>Implement jurisdiction-specific performance metrics</li>
-                        <li>Create interactive dashboards for real-time monitoring</li>
-                        <li>Conduct comparative analysis with other legal systems</li>
-                    </ul>
-
-                    <p>These recommendations aim to improve the efficiency, transparency, and accountability of the French administrative justice system while providing valuable tools for legal practitioners and policy makers.</p>
-                </div>
-            </section>
-
-            <div class="data-sources">
-                <h3>Data Sources and Methodology</h3>
-                <div class="source-item">Original XML data from French Administrative Courts (2022-2023)</div>
-                <div class="source-item">Processed using Rust-based ingestion pipeline with Polars</div>
-                <div class="source-item">Analytical processing with Python, Pandas, and custom metrics</div>
-                <div class="source-item">Visualizations generated using Matplotlib and Plotly</div>
-                <div class="source-item">Temporal analysis conducted with monthly aggregation</div>
-                <div class="source-item">Statistical validation using chi-square and ANOVA tests</div>
-            </div>
         </div>
     </div>
 
     <footer>
-        <p>French Court Decisions Analytics Report © 2024 | Data processed from French Administrative Courts</p>
-        <p style="margin-top: 10px;">
-            This report is for informational purposes only and does not constitute legal advice.
-        </p>
+        <p>Made with <a href="https://mistral.ai/fr/news/mistral-vibe-2-0">vibe</a> by <a href="https://ddonatien.github.io">ddonatien</a></p>
     </footer>
 </body>
 </html>

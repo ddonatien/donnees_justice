@@ -40,9 +40,9 @@ def generate_plots(df: pl.DataFrame = None, prefix: str = ""):
         jurisdiction_dist = compute_jurisdiction_distribution(df)
         solution_dist = compute_solution_distribution(df)
         recours_types_dist = compute_recours_type_distribution(df)
-        recours_by_month = aggregate_entry_by_month(df, entry_name="Type_Recours", prop=True)
-        solution_by_month = aggregate_entry_by_month(df, entry_name="Solution", prop=True)
-        jurisdiction_by_month = aggregate_entry_by_month(df, entry_name="Nom_Juridiction", prop=True)
+        recours_by_month = aggregate_entry_by_month(df, entry_name="Type_Recours", prop=False)
+        solution_by_month = aggregate_entry_by_month(df, entry_name="Solution", prop=False)
+        jurisdiction_by_month = aggregate_entry_by_month(df, entry_name="Nom_Juridiction", prop=False)
         recours_by_juri = aggregate_entry_by_jurisdiction(df, entry_name="Type_Recours", prop=True)
         solution_by_juri = aggregate_entry_by_jurisdiction(df, entry_name="Solution", prop=True)
         
